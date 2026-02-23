@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coleta de Lixo - Consulte sua região</title>
+    
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- CSS do projeto -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header com logos -->
+    <header class="header">
+        <div class="header-content">
+            <img id="logo-prefeitura" src="" alt="Logo Prefeitura" class="logo">
+            <img id="logo-empresa" src="" alt="Logo Empresa" class="logo">
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 id="titulo-principal">Coleta de Lixo</h1>
+            <p id="subtitulo" class="subtitulo"></p>
+            
+            <!-- Barra de busca -->
+            <div class="search-container">
+                <div class="search-box">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.3-4.3"></path>
+                    </svg>
+                    <input type="text" id="endereco-input" placeholder="Digite seu endereço..." autocomplete="off">
+                    <button id="btn-limpar" class="btn-limpar" title="Limpar" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6 6 18M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <button id="btn-localizacao" class="btn-localizacao" title="Usar minha localização">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 2v4m0 12v4M2 12h4m12 0h4"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Autocomplete -->
+            <ul id="autocomplete-list" class="autocomplete-list"></ul>
+        </div>
+    </section>
+
+    <!-- Resultados -->
+    <section id="resultados" class="resultados" style="display: none;">
+        <div class="resultados-content">
+            <h2 id="endereco-encontrado" class="endereco-titulo"></h2>
+            
+            <div class="cards-container">
+                <!-- Card Coleta Seletiva -->
+                <div class="card card-seletiva">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 6h18M6 6v14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </div>
+                        <div class="card-header-text">
+                            <h3>Coleta Seletiva</h3>
+                            <span class="badge badge-seletiva">Lixo que não é Lixo</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-item">
+                            <span class="info-label">Frequência</span>
+                            <span id="seletiva-frequencia" class="info-value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Turno</span>
+                            <span id="seletiva-turno" class="info-value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Horário</span>
+                            <span id="seletiva-horario" class="info-value">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card Coleta Domiciliar -->
+                <div class="card card-domiciliar">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                        </div>
+                        <div class="card-header-text">
+                            <h3>Coleta Domiciliar</h3>
+                            <span class="badge badge-domiciliar">Lixo Comum</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-item">
+                            <span class="info-label">Frequência</span>
+                            <span id="domiciliar-frequencia" class="info-value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Turno</span>
+                            <span id="domiciliar-turno" class="info-value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Horário</span>
+                            <span id="domiciliar-horario" class="info-value">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mapa -->
+    <section id="mapa-section" class="mapa-section" style="display: none;">
+        <div class="mapa-container">
+            <div id="mapa" class="mapa"></div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+        <div class="faq-content">
+            <h2 class="faq-titulo">Perguntas Frequentes</h2>
+            <div id="faq-container" class="faq-container">
+                <!-- FAQs serão inseridos via JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-principal">
+                <a id="link-156" href="#" target="_blank" class="contato-box">
+                    <span class="contato-numero" id="telefone-contato">156</span>
+                    <span class="contato-texto" id="texto-contato">Central de Atendimento</span>
+                </a>
+            </div>
+            <div class="footer-info">
+                <p id="footer-prefeitura"></p>
+                <p id="footer-empresa"></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Buscando informações...</p>
+    </div>
+
+    <!-- Error Toast -->
+    <div id="toast" class="toast" style="display: none;">
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

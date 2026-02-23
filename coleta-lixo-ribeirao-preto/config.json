@@ -1,0 +1,82 @@
+{
+  "cidade": {
+    "nome": "Ribeirão Preto",
+    "estado": "SP",
+    "coordenadas": [-21.1775, -47.8103],
+    "zoom": 12,
+    "boundingBox": "-48.05,-20.95,-47.65,-21.35"
+  },
+  
+  "contato": {
+    "telefone": "156",
+    "url": "",
+    "textoAtendimento": "Central de Atendimento ao Cidadão"
+  },
+  
+  "logos": {
+    "prefeitura": "images/prefeitura.png",
+    "empresa": "images/empresa.png"
+  },
+  
+  "textos": {
+    "tituloPrefeitura": "Prefeitura de Ribeirão Preto",
+    "tituloEmpresa": "Estre - Lixo é só o começo",
+    "subtitulo": "Descubra os dias e horários da coleta domiciliar e seletiva na sua região.",
+    "placeholder": "Digite seu endereço...",
+    "rodape": {
+      "prefeitura": "© 2026 Prefeitura Municipal de Ribeirão Preto",
+      "empresa": "Estre — Serviços de Limpeza Urbana"
+    }
+  },
+  
+  "cores": {
+    "primaria": "#2d8a5b",
+    "secundaria": "#3b9ebf",
+    "fundo": "#f5f9f7",
+    "texto": "#1a2e35",
+    "textoClaro": "#5a7a85",
+    "cartao": "#ffffff",
+    "borda": "#e0ebe5",
+    "destaque": "#e8f4ed"
+  },
+  
+  "arquivosGeoJSON": {
+    "coletaSeletiva": "data/coleta_seletiva.geojson",
+    "coletaDomiciliar": "data/coleta_domiciliar.geojson"
+  },
+  
+  "faqs": [
+    {
+      "pergunta": "Como descartar vidros e materiais cortantes?",
+      "resposta": "Vidros e materiais cortantes devem ser embalados em papel grosso (como jornal) ou caixa de papelão e identificados com a inscrição 'VIDRO' ou 'CORTANTE'. Nunca descarte esses materiais em sacolas plásticas comuns, pois podem causar acidentes aos coletores."
+    },
+    {
+      "pergunta": "Qual o horário limite para colocar o lixo na calçada?",
+      "resposta": "O lixo deve ser colocado na calçada com no máximo 1 hora de antecedência ao horário previsto para a passagem do caminhão. Evite colocar o lixo muito cedo para não causar problemas de higiene e mau cheiro na vizinhança."
+    },
+    {
+      "pergunta": "O que fazer se o caminhão não passar?",
+      "resposta": "Caso o caminhão de coleta não passe no horário previsto, aguarde até o final do dia. Se a coleta não for realizada, entre em contato com a Central de Atendimento 156 para registrar uma reclamação e solicitar a coleta pendente."
+    },
+    {
+      "pergunta": "O que pode ser reciclado na Coleta Seletiva?",
+      "resposta": "Podem ser reciclados: papéis (jornais, revistas, caixas), plásticos (garrafas PET, embalagens), metais (latas de alumínio, latas de aço) e vidros (garrafas, potes). Lembre-se de lavar as embalagens antes de descartá-las para reciclagem."
+    },
+    {
+      "pergunta": "Como descartar pilhas, baterias e lixo eletrônico?",
+      "resposta": "Pilhas, baterias, celulares e computadores não devem ser descartados na coleta comum ou seletiva. Leve esses materiais aos pontos de coleta específicos, como os Ecopontos espalhados pela cidade ou nos locais de entrega voluntária."
+    },
+    {
+      "pergunta": "Como descartar seringas e agulhas?",
+      "resposta": "Seringas e agulhas devem ser colocadas em recipientes rígidos e resistentes a perfuração, como garrafas PET grossas ou caixas coletoras específicas. Nunca descarte esses materiais no lixo comum ou reciclável. Leve aos postos de saúde ou farmácias que possuem pontos de coleta."
+    },
+    {
+      "pergunta": "Como descartar remédios vencidos?",
+      "resposta": "Remédios vencidos ou em desuso não devem ser jogados no lixo comum nem no vaso sanitário, pois contaminam o solo e a água. Leve-os até uma farmácia ou Unidade de Saúde que possua ponto de coleta de medicamentos."
+    },
+    {
+      "pergunta": "Como descartar tintas, solventes e inseticidas?",
+      "resposta": "Tintas, solventes, inseticidas e outros produtos químicos são considerados resíduos perigosos e NÃO devem ser descartados na coleta comum. Procure os Ecopontos da cidade ou entre em contato com a Central 156 para orientações sobre descarte correto."
+    }
+  ]
+}
