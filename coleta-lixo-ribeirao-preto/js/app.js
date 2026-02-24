@@ -421,11 +421,9 @@ function atualizarResultados(infoSeletiva, infoDomiciliar, endereco) {
         // Tentar pegar turno do campo TURNO, senão extrair de FREQUENCIA
         const turnoSeletiva = infoSeletiva.TURNO || infoSeletiva.turno || extrairTurno(freqSeletiva);
         document.getElementById('seletiva-turno').textContent = formatarTurno(turnoSeletiva);
-        document.getElementById('seletiva-horario').textContent = formatarHorario(infoSeletiva.Horario || infoSeletiva.horario || infoSeletiva.HORARIO);
     } else {
         document.getElementById('seletiva-frequencia').textContent = 'Não disponível';
         document.getElementById('seletiva-turno').textContent = '-';
-        document.getElementById('seletiva-horario').textContent = '-';
     }
     
     // Coleta Domiciliar
@@ -435,11 +433,9 @@ function atualizarResultados(infoSeletiva, infoDomiciliar, endereco) {
         // Tentar pegar turno do campo TURNO, senão extrair de FREQUENCIA
         const turnoDomiciliar = infoDomiciliar.TURNO || infoDomiciliar.turno || extrairTurno(freqDomiciliar);
         document.getElementById('domiciliar-turno').textContent = formatarTurno(turnoDomiciliar);
-        document.getElementById('domiciliar-horario').textContent = formatarHorario(infoDomiciliar.Horario || infoDomiciliar.horario || infoDomiciliar.HORARIO);
     } else {
         document.getElementById('domiciliar-frequencia').textContent = 'Não disponível';
         document.getElementById('domiciliar-turno').textContent = '-';
-        document.getElementById('domiciliar-horario').textContent = '-';
     }
 }
 
