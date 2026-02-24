@@ -442,12 +442,6 @@ function atualizarResultados(infoSeletiva, infoDomiciliar, endereco) {
         document.getElementById('domiciliar-horario').textContent = '-';
     }
 }
-    } else {
-        document.getElementById('domiciliar-frequencia').textContent = 'Não disponível';
-        document.getElementById('domiciliar-turno').textContent = '-';
-        document.getElementById('domiciliar-horario').textContent = '-';
-    }
-}
 
 // ===== FORMATADORES =====
 function formatarFrequencia(valor) {
