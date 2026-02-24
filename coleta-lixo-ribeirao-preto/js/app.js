@@ -205,14 +205,34 @@ async function buscarEndereco(query) {
         });
         
         const resultados = await response.json();
-        mostrarAutocomplete(resultados);
+        
+        // Extrair número digitado pelo usuário (se houver)
+        const numeroDigitado = extrairNumeroDoTexto(query);
+        
+        // Passar o número para o autocomplete
+        mostrarAutocomplete(resultados, numeroDigitado);
     } catch (error) {
         console.error('Erro na busca:', error);
     }
 }
 
+// ===== EXTRAIR NÚMERO DO TEXTO =====
+function extrairNumeroDoTexto(texto) {
+    // Procura por padrões como "123", ", 123", "nº 123", "n 123", "numero 123"
+    const match = texto.match(/[,\s]+(\d+)[\s]*$|[,\s]+n[º°]?\s*(\d+)|numero\s*(\d+)/i);
+    if (match) {
+        return match[1] || match[2] || match[3];
+    }
+    // Procura por número isolado no final
+    const matchFinal = texto.match(/\s(\d+)\s*$/);
+    if (matchFinal) {
+        return matchFinal[1];
+    }
+    return null;
+}
+
 // ===== MOSTRAR AUTOCOMPLETE =====
-function mostrarAutocomplete(resultados) {
+function mostrarAutocomplete(resultados, numeroDigitado = null) {
     const lista = document.getElementById('autocomplete-list');
     lista.innerHTML = '';
     
@@ -224,9 +244,9 @@ function mostrarAutocomplete(resultados) {
     resultados.forEach(item => {
         const li = document.createElement('li');
         li.className = 'autocomplete-item';
-        // Exibir endereço formatado curto na lista
-        li.textContent = formatarEnderecoExibicao(item);
-        li.addEventListener('click', () => selecionarEndereco(item));
+        // Exibir endereço formatado curto na lista, passando o número digitado
+        li.textContent = formatarEnderecoExibicao(item, numeroDigitado);
+        li.addEventListener('click', () => selecionarEndereco(item, numeroDigitado));
         lista.appendChild(li);
     });
 }
@@ -237,12 +257,12 @@ function limparAutocomplete() {
 }
 
 // ===== SELECIONAR ENDEREÇO =====
-async function selecionarEndereco(item) {
+async function selecionarEndereco(item, numeroDigitado = null) {
     const lat = parseFloat(item.lat);
     const lon = parseFloat(item.lon);
     
     // Formatar endereço curto
-    const endereco = formatarEnderecoExibicao(item);
+    const endereco = formatarEnderecoExibicao(item, numeroDigitado);
     
     document.getElementById('endereco-input').value = endereco;
     limparAutocomplete();
@@ -251,7 +271,7 @@ async function selecionarEndereco(item) {
 }
 
 // ===== FORMATAR ENDEREÇO PARA EXIBIÇÃO =====
-function formatarEnderecoExibicao(item) {
+function formatarEnderecoExibicao(item, numeroDigitado = null) {
     const address = item.address || {};
     
     // Montar endereço curto: Rua, Número - Bairro, Cidade
@@ -261,8 +281,8 @@ function formatarEnderecoExibicao(item) {
     const rua = address.road || address.street || address.pedestrian || address.footway || '';
     if (rua) partes.push(rua);
     
-    // Número
-    const numero = address.house_number || '';
+    // Número - usar o digitado pelo usuário ou o retornado pela API
+    const numero = numeroDigitado || address.house_number || '';
     if (numero && partes.length > 0) {
         partes[0] = partes[0] + ', ' + numero;
     }
