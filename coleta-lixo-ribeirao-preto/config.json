@@ -4,8 +4,10 @@
     "estado": "SP",
     "coordenadas": [-21.1775, -47.8103],
     "zoom": 12,
-    "boundingBox": "-48.05,-20.95,-47.65,-21.35"
+    "boundingBox": "-48.15,-20.85,-47.55,-21.45"
   },
+
+  "mapboxToken": "pk.eyJ1IjoiZ3VpbGhlcm1lamFtdXIiLCJhIjoiY21tODZndmFvMGR6YjJ4cTl5Y2M4dWdzcSJ9.6Xas5MZy1hwxHz044SzmGg",
   
   "contato": {
     "telefone": "156",

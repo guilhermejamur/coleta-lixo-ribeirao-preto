@@ -193,27 +193,45 @@ function setupEventListeners() {
     });
 }
 
-// ===== BUSCAR ENDEREÇO (Nominatim) =====
+// ===== BUSCAR ENDEREÇO (Mapbox) =====
 async function buscarEndereco(query) {
     try {
-        const bbox = config.cidade.boundingBox;
-        // Adiciona addressdetails=1 para receber componentes do endereço separados
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}, ${config.cidade.nome}, ${config.cidade.estado}&limit=5&bounded=1&viewbox=${bbox}&addressdetails=1`;
-        
-        const response = await fetch(url, {
-            headers: { 'Accept-Language': 'pt-BR' }
-        });
-        
-        const resultados = await response.json();
-        
-        // Extrair número digitado pelo usuário (se houver)
+        const [lat, lon] = config.cidade.coordenadas;
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${config.mapboxToken}&country=BR&proximity=${lon},${lat}&types=address,place&language=pt&limit=5`;
+
+        const response = await fetch(url);
+        const data = await response.json();
         const numeroDigitado = extrairNumeroDoTexto(query);
-        
-        // Passar o número para o autocomplete
+
+        const resultados = (data.features || []).map(feature => ({
+            lat: feature.center[1],
+            lon: feature.center[0],
+            display_name: feature.place_name,
+            address: extrairEnderecoMapbox(feature)
+        }));
+
         mostrarAutocomplete(resultados, numeroDigitado);
     } catch (error) {
         console.error('Erro na busca:', error);
     }
+}
+
+// ===== EXTRAIR ENDEREÇO DO RESULTADO MAPBOX =====
+function extrairEnderecoMapbox(feature) {
+    const context = feature.context || [];
+    const address = {};
+
+    if (feature.text) address.road = feature.text;
+    if (feature.address) address.house_number = feature.address;
+
+    context.forEach(item => {
+        if (item.id.startsWith('neighborhood')) address.suburb = item.text;
+        else if (item.id.startsWith('locality')) address.suburb = address.suburb || item.text;
+        else if (item.id.startsWith('place')) address.city = item.text;
+        else if (item.id.startsWith('district')) address.district = item.text;
+    });
+
+    return address;
 }
 
 // ===== EXTRAIR NÚMERO DO TEXTO =====
@@ -324,15 +342,20 @@ function usarGeolocalizacao() {
             // Reverse geocoding para pegar o endereço
             try {
                 const response = await fetch(
-                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`,
-                    { headers: { 'Accept-Language': 'pt-BR' } }
+                    `https://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json?access_token=${config.mapboxToken}&language=pt&types=address`
                 );
                 const data = await response.json();
-                const endereco = formatarEnderecoExibicao(data);
-                
+
+                let endereco = 'Sua localização';
+                if (data.features && data.features.length > 0) {
+                    const feature = data.features[0];
+                    const addressData = extrairEnderecoMapbox(feature);
+                    endereco = formatarEnderecoExibicao({ address: addressData }, null);
+                }
+
                 document.getElementById('endereco-input').value = endereco;
                 document.getElementById('btn-limpar').style.display = 'flex';
-                
+
                 await processarLocalizacao(lat, lon, endereco);
             } catch (error) {
                 mostrarLoading(false);
