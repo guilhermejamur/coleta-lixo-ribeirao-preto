@@ -8,29 +8,26 @@
   },
 
   "mapboxToken": "pk.eyJ1IjoiZ3VpbGhlcm1lamFtdXIiLCJhIjoiY21tODZndmFvMGR6YjJ4cTl5Y2M4dWdzcSJ9.6Xas5MZy1hwxHz044SzmGg",
-  
+
   "contato": {
     "telefone": "156",
     "url": "",
     "textoAtendimento": "Central de Atendimento ao Cidadão"
   },
-  
+
   "logos": {
-    "prefeitura": "images/prefeitura.png",
     "empresa": "images/empresa.png"
   },
-  
+
   "textos": {
-    "tituloPrefeitura": "Prefeitura de Ribeirão Preto",
     "tituloEmpresa": "Estre - Lixo é só o começo",
-    "subtitulo": "Descubra os dias e horários da coleta domiciliar e seletiva na sua região.",
+    "subtitulo": "Coleta de Lixo em Ribeirão Preto — Descubra os dias e horários da coleta domiciliar e seletiva na sua região.",
     "placeholder": "Digite seu endereço...",
     "rodape": {
-      "prefeitura": "© 2026 Prefeitura Municipal de Ribeirão Preto",
       "empresa": "Estre — Serviços de Limpeza Urbana"
     }
   },
-  
+
   "cores": {
     "primaria": "#2d8a5b",
     "secundaria": "#3b9ebf",
@@ -41,44 +38,36 @@
     "borda": "#e0ebe5",
     "destaque": "#e8f4ed"
   },
-  
+
   "arquivosGeoJSON": {
     "coletaSeletiva": "data/coleta_seletiva.geojson",
     "coletaDomiciliar": "data/coleta_domiciliar.geojson"
   },
-  
+
   "faqs": [
     {
       "pergunta": "Como descartar vidros e materiais cortantes?",
-      "resposta": "Vidros e materiais cortantes devem ser embalados em papel grosso (como jornal) ou caixa de papelão e identificados com a inscrição 'VIDRO' ou 'CORTANTE'. Nunca descarte esses materiais em sacolas plásticas comuns, pois podem causar acidentes aos coletores."
+      "resposta": "Vidros e materiais cortantes devem ser embalados em recipientes rígidos ou caixas de papelão resistentes, preferencialmente envoltos em papel ou jornal.<br><br>A embalagem deve ser fechada e identificada com a inscrição \"CUIDADO – VIDRO\" ou \"CORTANTE\".<br><br>Nunca descarte esses materiais soltos ou apenas em sacos plásticos, pois podem causar acidentes aos coletores."
     },
     {
       "pergunta": "Quando devo colocar o lixo na calçada?",
-      "resposta": "O lixo deve ser colocado na calçada de acordo com o turno de coleta da sua região: pela manhã (turno diurno) ou à noite (turno noturno). Coloque o lixo com no máximo 1 hora de antecedência ao início do turno. Evite colocar o lixo fora do horário para não causar problemas de higiene e mau cheiro na vizinhança."
-    },
-    {
-      "pergunta": "O que fazer se o caminhão não passar?",
-      "resposta": "Caso o caminhão de coleta não passe no horário previsto, aguarde até o final do dia. Se a coleta não for realizada, entre em contato com a Central de Atendimento 156 para registrar uma reclamação e solicitar a coleta pendente."
+      "resposta": "O lixo deve ser colocado na calçada até 1 hora antes do horário previsto da coleta em sua região.<br><br>Evite colocar o lixo fora do horário pois isso pode causar mau cheiro, atrair animais e espalhar o lixo pela rua.<br><br>Utilize sacos resistentes e bem fechados, evitando sobrecarregá-los."
     },
     {
       "pergunta": "O que pode ser reciclado na Coleta Seletiva?",
-      "resposta": "Podem ser reciclados: papéis (jornais, revistas, caixas), plásticos (garrafas PET, embalagens), metais (latas de alumínio, latas de aço) e vidros (garrafas, potes). Lembre-se de lavar as embalagens antes de descartá-las para reciclagem."
+      "resposta": "Podem ser reciclados: Papéis e papelão (jornais, revistas, caixas), Plásticos (garrafas PET, embalagens), Metais (latas de alumínio e aço) e Vidros de embalagens (garrafas e potes). As embalagens devem estar limpas e sem restos de alimentos, para evitar contaminação dos materiais recicláveis.<br><br>Não são recicláveis: espelhos, cerâmica, porcelana, lâmpadas, vidro temperado ou de automóveis."
     },
     {
-      "pergunta": "Como descartar pilhas, baterias e lixo eletrônico?",
-      "resposta": "Pilhas, baterias, celulares e computadores não devem ser descartados na coleta comum ou seletiva. Leve esses materiais aos pontos de coleta específicos, como os Ecopontos espalhados pela cidade ou nos locais de entrega voluntária."
+      "pergunta": "O que deve ser destinado nos ecopontos da cidade?",
+      "resposta": "Os ecopontos funcionam todos os dias, das 7h às 19h.<br><br>• Resíduos verdes: restos da arborização, galhos e cascas de árvores, folhas e flores (ensacados)<br>• Resíduo de Construção: tijolos, blocos, telhas, componentes cerâmicos, argamassa, concreto, solo<br>• Resíduos Volumosos: móveis e mobílias velhos ou danificados, colchões, sofás, armários, estante<br>• Recicláveis: papel, plástico, vidro, metal<br>• Óleo Vegetal: óleo de cozinha domiciliar<br>• Eletrodomésticos e eletroeletrônicos: geladeiras, fogões, máquinas de lavar roupa, celulares, computadores, televisores, rádios, baterias, pilhas<br>• Pneus de veículos automotivos: carros, motos, bicicletas<br><br><em>Observação: atenção à quantidade de descarte na sua região (há um volume máximo por dia).</em><br><br><a href=\"https://www.google.com/maps/d/viewer?mid=1l5Mv3jAGzDKmWfNqdxtClbP2ubVeMFw&ll=-21.195388024872038%2C-47.79178849999999&z=11\" target=\"_blank\" rel=\"noopener noreferrer\">Ver endereços dos ecopontos no mapa</a>"
     },
     {
       "pergunta": "Como descartar seringas e agulhas?",
-      "resposta": "Seringas e agulhas devem ser colocadas em recipientes rígidos e resistentes a perfuração, como garrafas PET grossas ou caixas coletoras específicas. Nunca descarte esses materiais no lixo comum ou reciclável. Leve aos postos de saúde ou farmácias que possuem pontos de coleta."
+      "resposta": "Seringas e agulhas são resíduos perfurocortantes e exigem cuidados especiais.<br><br>Eles devem ser armazenados em recipientes rígidos e resistentes à perfuração, com tampa segura, como garrafas PET grossas. Sempre que possível, utilize coletores apropriados para perfurocortantes.<br><br>Após o armazenamento, leve os materiais a unidades de saúde ou farmácias que possuam programas de coleta.<br><br>Nunca descarte agulhas ou seringas soltas no lixo comum."
     },
     {
       "pergunta": "Como descartar remédios vencidos?",
       "resposta": "Remédios vencidos ou em desuso não devem ser jogados no lixo comum nem no vaso sanitário, pois contaminam o solo e a água. Leve-os até uma farmácia ou Unidade de Saúde que possua ponto de coleta de medicamentos."
-    },
-    {
-      "pergunta": "Como descartar tintas, solventes e inseticidas?",
-      "resposta": "Tintas, solventes, inseticidas e outros produtos químicos são considerados resíduos perigosos e NÃO devem ser descartados na coleta comum. Procure os Ecopontos da cidade ou entre em contato com a Central 156 para orientações sobre descarte correto."
     }
   ]
 }

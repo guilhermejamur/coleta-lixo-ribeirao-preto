@@ -40,7 +40,6 @@ function aplicarConfig() {
     root.style.setProperty('--cor-destaque', config.cores.destaque);
     
     // Logos
-    document.getElementById('logo-prefeitura').src = config.logos.prefeitura;
     document.getElementById('logo-empresa').src = config.logos.empresa;
     
     // Textos
@@ -52,7 +51,6 @@ function aplicarConfig() {
     document.getElementById('telefone-contato').textContent = config.contato.telefone;
     document.getElementById('texto-contato').textContent = config.contato.textoAtendimento;
     document.getElementById('link-156').href = config.contato.url;
-    document.getElementById('footer-prefeitura').textContent = config.textos.rodape.prefeitura;
     document.getElementById('footer-empresa').textContent = config.textos.rodape.empresa;
     
     // Título da página
@@ -197,18 +195,31 @@ function setupEventListeners() {
 async function buscarEndereco(query) {
     try {
         const [lat, lon] = config.cidade.coordenadas;
-        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${config.mapboxToken}&country=BR&proximity=${lon},${lat}&types=address,place&language=pt&limit=5`;
+
+        // config.cidade.boundingBox: min_lon,max_lat,max_lon,min_lat (formato Nominatim)
+        // Mapbox bbox: min_lon,min_lat,max_lon,max_lat
+        const [west, north, east, south] = config.cidade.boundingBox.split(',').map(Number);
+        const bbox = `${west},${south},${east},${north}`;
+
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${config.mapboxToken}&country=BR&proximity=${lon},${lat}&bbox=${bbox}&types=address,place&language=pt&limit=10`;
 
         const response = await fetch(url);
         const data = await response.json();
         const numeroDigitado = extrairNumeroDoTexto(query);
 
-        const resultados = (data.features || []).map(feature => ({
-            lat: feature.center[1],
-            lon: feature.center[0],
-            display_name: feature.place_name,
-            address: extrairEnderecoMapbox(feature)
-        }));
+        const cidadeNorm = config.cidade.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+        const resultados = (data.features || [])
+            .filter(feature => {
+                const placeName = (feature.place_name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                return placeName.includes(cidadeNorm);
+            })
+            .map(feature => ({
+                lat: feature.center[1],
+                lon: feature.center[0],
+                display_name: feature.place_name,
+                address: extrairEnderecoMapbox(feature)
+            }));
 
         mostrarAutocomplete(resultados, numeroDigitado);
     } catch (error) {
