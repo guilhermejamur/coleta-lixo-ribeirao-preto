@@ -9,12 +9,6 @@
 
   "mapboxToken": "pk.eyJ1IjoiZ3VpbGhlcm1lamFtdXIiLCJhIjoiY21tODZndmFvMGR6YjJ4cTl5Y2M4dWdzcSJ9.6Xas5MZy1hwxHz044SzmGg",
 
-  "contato": {
-    "telefone": "156",
-    "url": "",
-    "textoAtendimento": "Central de Atendimento ao Cidadão"
-  },
-
   "logos": {
     "empresa": "images/empresa.png"
   },

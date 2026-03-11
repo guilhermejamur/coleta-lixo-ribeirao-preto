@@ -48,9 +48,6 @@ function aplicarConfig() {
     document.getElementById('endereco-input').placeholder = config.textos.placeholder;
     
     // Footer
-    document.getElementById('telefone-contato').textContent = config.contato.telefone;
-    document.getElementById('texto-contato').textContent = config.contato.textoAtendimento;
-    document.getElementById('link-156').href = config.contato.url;
     document.getElementById('footer-empresa').textContent = config.textos.rodape.empresa;
     
     // Título da página
