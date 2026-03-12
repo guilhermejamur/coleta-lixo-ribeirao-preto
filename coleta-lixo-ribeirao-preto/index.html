@@ -158,5 +158,12 @@
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="js/app.js"></script>
+<script>
+    var enviarAltura = function() {
+      window.parent.postMessage({ iframeHeight: document.body.scrollHeight }, '*');
+    };
+    new ResizeObserver(enviarAltura).observe(document.body);
+    window.addEventListener('load', enviarAltura);
+  </script>
 </body>
 </html>
