@@ -497,6 +497,7 @@ function formatarFrequencia(valor) {
     // Formato Ribeirão Preto: "SEGUNDA-FEIRA DIURNO", "SEG/QUA/SEX - NOTURNO", "SABADO DIURNO"
     // Primeiro, extrair apenas os dias (remover turno)
     let dias = valor
+        .replace(/^(DIURNO|NOTURNO|VESPERTINO) - /gi, '')
         .replace(/ - (DIURNO|NOTURNO|VESPERTINO)/gi, '')
         .replace(/ (DIURNO|NOTURNO|VESPERTINO)/gi, '')
         .trim();
