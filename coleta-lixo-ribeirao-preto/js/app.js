@@ -479,7 +479,7 @@ function atualizarResultados(infoSeletiva, infoDomiciliar, endereco) {
     
     // Coleta Domiciliar
     if (infoDomiciliar) {
-        const freqDomiciliar = infoDomiciliar.FREQUENCIA || infoDomiciliar.frequencia;
+        const freqDomiciliar = infoDomiciliar.FREQUENCIA || infoDomiciliar.frequencia || infoDomiciliar.layer;
         document.getElementById('domiciliar-frequencia').textContent = formatarFrequencia(freqDomiciliar);
         // Tentar pegar turno do campo TURNO, senão extrair de FREQUENCIA
         const turnoDomiciliar = infoDomiciliar.TURNO || infoDomiciliar.turno || extrairTurno(freqDomiciliar);
@@ -604,7 +604,7 @@ function atualizarMapa(lat, lon, infoSeletiva, infoDomiciliar) {
         popupContent += `<p><strong>Seletiva:</strong> ${formatarFrequencia(infoSeletiva.FREQUENCIA || infoSeletiva.frequencia)}</p>`;
     }
     if (infoDomiciliar) {
-        popupContent += `<p><strong>Domiciliar:</strong> ${formatarFrequencia(infoDomiciliar.FREQUENCIA || infoDomiciliar.frequencia)}</p>`;
+        popupContent += `<p><strong>Domiciliar:</strong> ${formatarFrequencia(infoDomiciliar.FREQUENCIA || infoDomiciliar.frequencia || infoDomiciliar.layer)}</p>`;
     }
     
     popupContent += '</div>';
