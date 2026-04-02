@@ -218,9 +218,27 @@ async function buscarEndereco(query) {
                 address: extrairEnderecoMapbox(feature)
             }));
 
-        mostrarAutocomplete(resultados, numeroDigitado);
+        if (resultados.length > 0) {
+            mostrarAutocomplete(resultados, numeroDigitado);
+        } else {
+            // Fallback: busca via backend (Google Maps) — chave nunca exposta no frontend
+            const fallback = await buscarEnderecoFallback(valor);
+            mostrarAutocomplete(fallback, numeroDigitado);
+        }
     } catch (error) {
         console.error('Erro na busca:', error);
+    }
+}
+
+// ===== FALLBACK DE GEOCODIFICAÇÃO (via backend /api/geocode) =====
+async function buscarEnderecoFallback(query) {
+    try {
+        const resp = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
+        if (!resp.ok) return [];
+        const data = await resp.json();
+        return Array.isArray(data) ? data : [];
+    } catch {
+        return [];
     }
 }
 
@@ -479,7 +497,7 @@ function atualizarResultados(infoSeletiva, infoDomiciliar, endereco) {
     
     // Coleta Domiciliar
     if (infoDomiciliar) {
-        const freqDomiciliar = infoDomiciliar.FREQUENCIA || infoDomiciliar.frequencia || infoDomiciliar.layer;
+        const freqDomiciliar = infoDomiciliar.FREQUENCIA || infoDomiciliar.frequencia || normalizarLayer(infoDomiciliar.layer);
         document.getElementById('domiciliar-frequencia').textContent = formatarFrequencia(freqDomiciliar);
         // Tentar pegar turno do campo TURNO, senão extrair de FREQUENCIA
         const turnoDomiciliar = infoDomiciliar.TURNO || infoDomiciliar.turno || extrairTurno(freqDomiciliar);
@@ -555,6 +573,14 @@ function extrairTurno(frequencia) {
     if (!frequencia) return null;
     const match = frequencia.match(/(DIURNO|NOTURNO|VESPERTINO)/i);
     return match ? match[1].toUpperCase() : null;
+}
+
+function normalizarLayer(layer) {
+    // Converte "DIURNO - SEG/QUA/SEX" → "SEG/QUA/SEX - DIURNO"
+    if (!layer) return null;
+    const parts = layer.split(' - ');
+    if (parts.length === 2) return `${parts[1]} - ${parts[0]}`;
+    return layer;
 }
 
 function formatarHorario(valor) {

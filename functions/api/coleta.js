@@ -52,7 +52,7 @@ export async function onRequest(context) {
     // --- Geocodificação por endereço ---
     } else if (enderecoParam) {
       const config = await carregarConfig(request, env);
-      const geocoded = await geocodificar(enderecoParam, config.mapboxToken, config);
+      const geocoded = await geocodificar(enderecoParam, config, env);
 
       if (!geocoded) {
         return jsonResponse({
@@ -143,9 +143,24 @@ async function carregarConfig(request, env) {
 }
 
 // ─────────────────────────────────────────────
-// Geocodificação via Mapbox
+// Geocodificação: Mapbox com fallback para Google Maps
+// A chave do Google é lida de env.GOOGLE_MAPS_KEY — nunca exposta ao cliente.
 // ─────────────────────────────────────────────
-async function geocodificar(endereco, token, config) {
+async function geocodificar(endereco, config, env) {
+  // 1. Tentar Mapbox
+  const resultMapbox = await geocodificarMapbox(endereco, config);
+  if (resultMapbox) return resultMapbox;
+
+  // 2. Fallback: Google Maps
+  if (env.GOOGLE_MAPS_KEY) {
+    return await geocodificarGoogle(endereco, config, env.GOOGLE_MAPS_KEY);
+  }
+
+  return null;
+}
+
+async function geocodificarMapbox(endereco, config) {
+  const token = config.mapboxToken;
   const bb = config.cidade?.boundingBox?.split(',') || [];
   const bbox = bb.length === 4 ? `${bb[0]},${bb[3]},${bb[2]},${bb[1]}` : '';
   const [lat, lon] = config.cidade?.coordenadas || [];
@@ -161,12 +176,8 @@ async function geocodificar(endereco, token, config) {
   });
 
   const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(endereco)}.json?${params}`;
-
   const resp = await fetch(url, {
-    headers: {
-      'Referer': 'https://coleta-lixo-ribeirao-preto.pages.dev',
-      'Origin': 'https://coleta-lixo-ribeirao-preto.pages.dev',
-    },
+    headers: { 'Referer': 'https://coleta-lixo-ribeirao-preto.pages.dev' },
   });
 
   const data = await resp.json();
@@ -177,6 +188,42 @@ async function geocodificar(endereco, token, config) {
     lat: feature.center[1],
     lng: feature.center[0],
     display_name: feature.place_name,
+  };
+}
+
+async function geocodificarGoogle(endereco, config, apiKey) {
+  const cidade = config.cidade;
+  const [west, north, east, south] = cidade.boundingBox.split(',').map(Number);
+
+  const params = new URLSearchParams({
+    address: `${endereco}, ${cidade.nome}, SP, Brasil`,
+    key: apiKey,
+    language: 'pt',
+    region: 'br',
+    components: 'country:BR',
+  });
+
+  const resp = await fetch(
+    `https://maps.googleapis.com/maps/api/geocode/json?${params}`
+  );
+  const data = await resp.json();
+
+  if (data.status !== 'OK' || !data.results?.length) return null;
+
+  const getComp = (components, type) =>
+    components.find(c => c.types.includes(type))?.long_name || '';
+
+  const result = data.results.find(r => {
+    const { lat, lng } = r.geometry.location;
+    return lat >= south && lat <= north && lng >= west && lng <= east;
+  });
+
+  if (!result) return null;
+
+  return {
+    lat: result.geometry.location.lat,
+    lng: result.geometry.location.lng,
+    display_name: result.formatted_address,
   };
 }
 
