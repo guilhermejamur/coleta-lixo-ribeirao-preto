@@ -127,10 +127,12 @@ async function geocodificarMapbox(query, config) {
         .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       if (!cidadeCtx.includes(cidadeNorm)) return false;
 
-      // 2. Ao menos uma palavra significativa da busca deve estar no nome da rua
+      // 2. Palavras significativas da busca que aparecem no nome da rua
       const streetName = (f.text || '')
         .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      return queryWords.some(w => streetName.includes(w));
+      const matches = queryWords.filter(w => streetName.includes(w)).length;
+      // Exige ao menos min(2, total de palavras) para evitar falsos positivos por palavras comuns
+      return matches >= Math.min(2, queryWords.length);
     })
     .map(f => {
       const ctx = f.context || [];
