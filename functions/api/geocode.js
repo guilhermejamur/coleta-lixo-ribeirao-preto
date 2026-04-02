@@ -111,16 +111,26 @@ async function geocodificarMapbox(query, config) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
 
+  // Palavras significativas da query (ignora tipo de logradouro, preposições e números)
+  const stopWords = new Set(['rua', 'avenida', 'av', 'alameda', 'al', 'travessa', 'tv',
+    'estrada', 'est', 'praca', 'pc', 'de', 'da', 'do', 'das', 'dos', 'e', 'a', 'o']);
+  const queryWords = query
+    .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, '').split(/\s+/)
+    .filter(w => w.length > 2 && !stopWords.has(w) && !/^\d+$/.test(w));
+
   return data.features
     .filter(f => {
-      // Verifica a cidade no contexto (campo "place"), não no nome completo da rua,
-      // evitando falsos positivos como "Rua Ribeirão Preto" em outra cidade.
+      // 1. Verifica cidade pelo contexto (evita "Rua Ribeirão Preto" em outra cidade)
       const ctx = f.context || [];
       const cidadeCtx = (ctx.find(c => c.id?.startsWith('place'))?.text || '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
-      return cidadeCtx.includes(cidadeNorm);
+        .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      if (!cidadeCtx.includes(cidadeNorm)) return false;
+
+      // 2. Ao menos uma palavra significativa da busca deve estar no nome da rua
+      const streetName = (f.text || '')
+        .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return queryWords.some(w => streetName.includes(w));
     })
     .map(f => {
       const ctx = f.context || [];
