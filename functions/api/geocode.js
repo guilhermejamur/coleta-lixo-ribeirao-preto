@@ -113,11 +113,14 @@ async function geocodificarMapbox(query, config) {
 
   return data.features
     .filter(f => {
-      const name = (f.place_name || '')
+      // Verifica a cidade no contexto (campo "place"), não no nome completo da rua,
+      // evitando falsos positivos como "Rua Ribeirão Preto" em outra cidade.
+      const ctx = f.context || [];
+      const cidadeCtx = (ctx.find(c => c.id?.startsWith('place'))?.text || '')
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '');
-      return name.includes(cidadeNorm);
+      return cidadeCtx.includes(cidadeNorm);
     })
     .map(f => {
       const ctx = f.context || [];

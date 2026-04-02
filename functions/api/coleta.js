@@ -183,7 +183,23 @@ async function geocodificarMapbox(endereco, config) {
   const data = await resp.json();
   if (!data.features?.length) return null;
 
-  const feature = data.features[0];
+  const cidadeNorm = config.cidade.nome
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+  // Verifica cidade pelo contexto (evita falso positivo como "Rua Ribeirão Preto")
+  const feature = data.features.find(f => {
+    const ctx = f.context || [];
+    const cidadeCtx = (ctx.find(c => c.id?.startsWith('place'))?.text || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+    return cidadeCtx.includes(cidadeNorm);
+  });
+
+  if (!feature) return null;
+
   return {
     lat: feature.center[1],
     lng: feature.center[0],
