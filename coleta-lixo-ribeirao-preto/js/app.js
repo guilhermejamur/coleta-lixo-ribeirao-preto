@@ -588,7 +588,8 @@ function atualizarMapa(lat, lon, infoSeletiva, infoDomiciliar) {
         popupContent += `<p><strong>Seletiva:</strong> ${formatarFrequencia(infoSeletiva.FREQUENCIA || infoSeletiva.frequencia)}</p>`;
     }
     if (infoDomiciliar) {
-        popupContent += `<p><strong>Domiciliar:</strong> ${formatarFrequencia(infoDomiciliar.FREQUENCIA || infoDomiciliar.frequencia)}</p>`;
+        const freqDomiciliar = infoDomiciliar.FREQUENCIA || infoDomiciliar.frequencia || normalizarLayer(infoDomiciliar.layer);
+        popupContent += `<p><strong>Domiciliar:</strong> ${formatarFrequencia(freqDomiciliar)}</p>`;
     }
     
     popupContent += '</div>';
