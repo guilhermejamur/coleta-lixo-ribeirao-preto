@@ -218,27 +218,9 @@ async function buscarEndereco(query) {
                 address: extrairEnderecoMapbox(feature)
             }));
 
-        if (resultados.length > 0) {
-            mostrarAutocomplete(resultados, numeroDigitado);
-        } else {
-            // Fallback: busca via backend (Google Maps) — chave nunca exposta no frontend
-            const fallback = await buscarEnderecoFallback(valor);
-            mostrarAutocomplete(fallback, numeroDigitado);
-        }
+        mostrarAutocomplete(resultados, numeroDigitado);
     } catch (error) {
         console.error('Erro na busca:', error);
-    }
-}
-
-// ===== FALLBACK DE GEOCODIFICAÇÃO (via backend /api/geocode) =====
-async function buscarEnderecoFallback(query) {
-    try {
-        const resp = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
-        if (!resp.ok) return [];
-        const data = await resp.json();
-        return Array.isArray(data) ? data : [];
-    } catch {
-        return [];
     }
 }
 
@@ -515,7 +497,6 @@ function formatarFrequencia(valor) {
     // Formato Ribeirão Preto: "SEGUNDA-FEIRA DIURNO", "SEG/QUA/SEX - NOTURNO", "SABADO DIURNO"
     // Primeiro, extrair apenas os dias (remover turno)
     let dias = valor
-        .replace(/^(DIURNO|NOTURNO|VESPERTINO) - /gi, '')
         .replace(/ - (DIURNO|NOTURNO|VESPERTINO)/gi, '')
         .replace(/ (DIURNO|NOTURNO|VESPERTINO)/gi, '')
         .trim();
@@ -631,7 +612,7 @@ function atualizarMapa(lat, lon, infoSeletiva, infoDomiciliar) {
         popupContent += `<p><strong>Seletiva:</strong> ${formatarFrequencia(infoSeletiva.FREQUENCIA || infoSeletiva.frequencia)}</p>`;
     }
     if (infoDomiciliar) {
-        popupContent += `<p><strong>Domiciliar:</strong> ${formatarFrequencia(infoDomiciliar.FREQUENCIA || infoDomiciliar.frequencia || infoDomiciliar.layer)}</p>`;
+        popupContent += `<p><strong>Domiciliar:</strong> ${formatarFrequencia(infoDomiciliar.FREQUENCIA || infoDomiciliar.frequencia)}</p>`;
     }
     
     popupContent += '</div>';
