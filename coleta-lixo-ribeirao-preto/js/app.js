@@ -43,7 +43,7 @@ function aplicarConfig() {
     document.getElementById('logo-empresa').src = config.logos.empresa;
     
     // Textos
-    document.getElementById('titulo-principal').textContent = `Coleta de Lixo - ${config.cidade.nome}`;
+    document.getElementById('titulo-principal').textContent = `Coleta de Lixo em ${config.cidade.nome}`;
     document.getElementById('subtitulo').textContent = config.textos.subtitulo;
     document.getElementById('endereco-input').placeholder = config.textos.placeholder;
     
@@ -188,37 +188,13 @@ function setupEventListeners() {
     });
 }
 
-// ===== BUSCAR ENDEREÇO (Mapbox) =====
+// ===== BUSCAR ENDEREÇO (via /api/geocode — Mapbox + fallback Google Maps) =====
 async function buscarEndereco(query) {
     try {
-        const [lat, lon] = config.cidade.coordenadas;
-
-        // config.cidade.boundingBox: min_lon,max_lat,max_lon,min_lat (formato Nominatim)
-        // Mapbox bbox: min_lon,min_lat,max_lon,max_lat
-        const [west, north, east, south] = config.cidade.boundingBox.split(',').map(Number);
-        const bbox = `${west},${south},${east},${north}`;
-
-        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${config.mapboxToken}&country=BR&proximity=${lon},${lat}&bbox=${bbox}&types=address,place&language=pt&limit=10`;
-
-        const response = await fetch(url);
-        const data = await response.json();
         const numeroDigitado = extrairNumeroDoTexto(query);
-
-        const cidadeNorm = config.cidade.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
-        const resultados = (data.features || [])
-            .filter(feature => {
-                const placeName = (feature.place_name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                return placeName.includes(cidadeNorm);
-            })
-            .map(feature => ({
-                lat: feature.center[1],
-                lon: feature.center[0],
-                display_name: feature.place_name,
-                address: extrairEnderecoMapbox(feature)
-            }));
-
-        mostrarAutocomplete(resultados, numeroDigitado);
+        const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
+        const resultados = await response.json();
+        mostrarAutocomplete(Array.isArray(resultados) ? resultados : [], numeroDigitado);
     } catch (error) {
         console.error('Erro na busca:', error);
     }

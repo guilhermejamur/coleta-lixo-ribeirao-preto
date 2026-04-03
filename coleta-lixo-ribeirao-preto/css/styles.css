@@ -41,11 +41,6 @@ body {
     line-height: 1.6;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-}
-
-.faq-section {
-    flex: 1;
 }
 
 /* ===== HEADER ===== */
