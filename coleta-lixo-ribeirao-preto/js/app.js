@@ -209,8 +209,8 @@ function extrairEnderecoMapbox(feature) {
     if (feature.address) address.house_number = feature.address;
 
     context.forEach(item => {
-        if (item.id.startsWith('neighborhood')) address.suburb = item.text;
-        else if (item.id.startsWith('locality')) address.suburb = address.suburb || item.text;
+        if (item.id.startsWith('locality')) address.suburb = item.text;
+        else if (item.id.startsWith('neighborhood')) address.suburb = address.suburb || item.text;
         else if (item.id.startsWith('place')) address.city = item.text;
         else if (item.id.startsWith('district')) address.district = item.text;
     });

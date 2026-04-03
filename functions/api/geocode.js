@@ -144,7 +144,7 @@ async function geocodificarMapbox(query, config) {
         address: {
           road: f.text || '',
           house_number: f.address || '',
-          suburb: get('neighborhood') || get('locality'),
+          suburb: get('locality') || get('neighborhood'),
           city: get('place'),
         },
         fonte: 'mapbox',
