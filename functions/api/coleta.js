@@ -170,8 +170,6 @@ async function geocodificar(endereco, config, env) {
 async function geocodificarNominatim(endereco, config) {
   try {
     const cidade = config.cidade;
-    // boundingBox no config: "west,north,east,south"
-    // Nominatim viewbox espera: "west,south,east,north"
     const [west, north, east, south] = cidade.boundingBox.split(',').map(Number);
 
     const params = new URLSearchParams({
@@ -181,6 +179,7 @@ async function geocodificarNominatim(endereco, config) {
       countrycodes: 'br',
       bounded: '1',
       viewbox: `${west},${south},${east},${north}`,
+      addressdetails: '1',
       'accept-language': 'pt',
     });
 
@@ -202,8 +201,32 @@ async function geocodificarNominatim(endereco, config) {
     const lat = parseFloat(result.lat);
     const lng = parseFloat(result.lon);
 
-    // Confirmar que o ponto está dentro do bounding box da cidade
     if (lat < south || lat > north || lng < west || lng > east) return null;
+
+    // Validar que a rua retornada corresponde ao que foi digitado.
+    // Sem isso, o Nominatim pode casar palavras da cidade com nomes de rua
+    // (ex: "Rua Ribeirão Preto" para qualquer endereço com "ribeirão preto sp").
+    const stopWords = new Set([
+      'rua', 'avenida', 'av', 'alameda', 'al', 'travessa', 'tv', 'estrada',
+      'est', 'praca', 'pc', 'de', 'da', 'do', 'das', 'dos', 'e', 'a', 'o',
+      'sp', 'br', 'brasil',
+    ]);
+    const cidadeNorm = cidade.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    // Palavras significativas do que o usuário digitou (ignora cidade, estado, stop words e números)
+    const palavrasQuery = endereco
+      .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, '').split(/\s+/)
+      .filter(w => w.length > 2 && !stopWords.has(w) && !/^\d+$/.test(w) && !cidadeNorm.includes(w));
+
+    // Nome da rua retornada pelo Nominatim
+    const addr = result.address || {};
+    const rua = (addr.road || addr.pedestrian || result.display_name || '')
+      .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    // Exige ao menos uma palavra significativa da query no nome da rua retornada
+    const matches = palavrasQuery.filter(w => rua.includes(w)).length;
+    if (palavrasQuery.length > 0 && matches === 0) return null;
 
     return { lat, lng, display_name: result.display_name };
   } catch {

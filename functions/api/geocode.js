@@ -117,11 +117,34 @@ async function geocodificarNominatim(query, config) {
     const data = await resp.json();
     if (!data?.length) return [];
 
+    const stopWords = new Set([
+      'rua', 'avenida', 'av', 'alameda', 'al', 'travessa', 'tv', 'estrada',
+      'est', 'praca', 'pc', 'de', 'da', 'do', 'das', 'dos', 'e', 'a', 'o',
+      'sp', 'br', 'brasil',
+    ]);
+    const cidadeNorm = cidade.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    const palavrasQuery = query
+      .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, '').split(/\s+/)
+      .filter(w => w.length > 2 && !stopWords.has(w) && !/^\d+$/.test(w) && !cidadeNorm.includes(w));
+
     return data
       .filter(r => {
         const lat = parseFloat(r.lat);
         const lng = parseFloat(r.lon);
-        return lat >= south && lat <= north && lng >= west && lng <= east;
+        if (lat < south || lat > north || lng < west || lng > east) return false;
+
+        // Rejeitar resultados cuja rua não tem nenhuma palavra da query
+        if (palavrasQuery.length > 0) {
+          const addr = r.address || {};
+          const rua = (addr.road || addr.pedestrian || r.display_name || '')
+            .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          const matches = palavrasQuery.filter(w => rua.includes(w)).length;
+          if (matches === 0) return false;
+        }
+
+        return true;
       })
       .map(r => {
         const addr = r.address || {};
