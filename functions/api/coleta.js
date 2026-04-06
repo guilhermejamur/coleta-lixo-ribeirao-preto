@@ -90,8 +90,12 @@ export async function onRequest(context) {
       coordenadas: { lat: finalLat, lng: finalLng },
       ...(enderecoUsado && { endereco: enderecoUsado }),
       encontrado,
-      seletiva: infoSeletiva ? formatarColeta(infoSeletiva) : null,
-      domiciliar: infoDomiciliar ? formatarColeta(infoDomiciliar) : null,
+      seletiva: infoSeletiva
+        ? formatarColeta(infoSeletiva)
+        : { encontrado: false, mensagem: 'Coleta seletiva não mapeada para este endereço.' },
+      domiciliar: infoDomiciliar
+        ? formatarColeta(infoDomiciliar)
+        : { encontrado: false, mensagem: 'Coleta domiciliar não mapeada para este endereço.' },
       ...(encontrado
         ? {}
         : { mensagem: 'Localização fora da área de cobertura do serviço.' }
@@ -147,16 +151,64 @@ async function carregarConfig(request, env) {
 // A chave do Google é lida de env.GOOGLE_MAPS_KEY — nunca exposta ao cliente.
 // ─────────────────────────────────────────────
 async function geocodificar(endereco, config, env) {
-  // 1. Tentar Mapbox
+  // 1. Nominatim (OpenStreetMap) — gratuito, sem chave de API
+  const resultNominatim = await geocodificarNominatim(endereco, config);
+  if (resultNominatim) return resultNominatim;
+
+  // 2. Fallback: Mapbox
   const resultMapbox = await geocodificarMapbox(endereco, config);
   if (resultMapbox) return resultMapbox;
 
-  // 2. Fallback: Google Maps
+  // 3. Fallback final: Google Maps
   if (env.GOOGLE_MAPS_KEY) {
     return await geocodificarGoogle(endereco, config, env.GOOGLE_MAPS_KEY);
   }
 
   return null;
+}
+
+async function geocodificarNominatim(endereco, config) {
+  try {
+    const cidade = config.cidade;
+    // boundingBox no config: "west,north,east,south"
+    // Nominatim viewbox espera: "west,south,east,north"
+    const [west, north, east, south] = cidade.boundingBox.split(',').map(Number);
+
+    const params = new URLSearchParams({
+      q: `${endereco}, ${cidade.nome}, ${cidade.estado}, Brasil`,
+      format: 'json',
+      limit: '1',
+      countrycodes: 'br',
+      bounded: '1',
+      viewbox: `${west},${south},${east},${north}`,
+      'accept-language': 'pt',
+    });
+
+    const resp = await fetch(
+      `https://nominatim.openstreetmap.org/search?${params}`,
+      {
+        headers: {
+          'User-Agent': `coleta-lixo-${cidade.nome.toLowerCase().replace(/\s+/g, '-')}/1.0`,
+          'Accept-Language': 'pt',
+        },
+      }
+    );
+
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (!data?.length) return null;
+
+    const result = data[0];
+    const lat = parseFloat(result.lat);
+    const lng = parseFloat(result.lon);
+
+    // Confirmar que o ponto está dentro do bounding box da cidade
+    if (lat < south || lat > north || lng < west || lng > east) return null;
+
+    return { lat, lng, display_name: result.display_name };
+  } catch {
+    return null;
+  }
 }
 
 async function geocodificarMapbox(endereco, config) {
@@ -302,7 +354,11 @@ function parseFrequencia(valor) {
   for (const t of turnos) {
     if (valor.toUpperCase().includes(t)) {
       turno = t;
-      dias = valor.replace(new RegExp(`\\s*-?\\s*${t}`, 'i'), '').trim();
+      // Remove o turno do início ou do fim, junto com separadores opcionais
+      dias = valor
+        .replace(new RegExp(`^\\s*${t}\\s*[-–]?\\s*`, 'i'), '')
+        .replace(new RegExp(`\\s*[-–]?\\s*${t}\\s*$`, 'i'), '')
+        .trim();
       break;
     }
   }
@@ -311,11 +367,13 @@ function parseFrequencia(valor) {
 }
 
 function formatarColeta(props) {
-  const freq = props.FREQUENCIA || props.frequencia || null;
+  // Domiciliar: quando FREQUENCIA é nulo, a informação está no campo 'layer'
+  // Ex: 'DIURNO - SEG/QUA/SEX' ou 'NOTURNO - TER/QUI/SAB'
+  const freq = props.FREQUENCIA || props.frequencia || props.layer || null;
   const { dias, turno } = parseFrequencia(freq);
 
   return {
-    setor: props.APELIDO || props.IDENTIFICA || null,
+    setor: props.APELIDO || props.IDENTIFICA || props.Name || null,
     setor_completo: props.SETOR || null,
     macrosetor: props.MACROSETOR || null,
     frequencia_raw: freq,

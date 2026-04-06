@@ -45,13 +45,19 @@ export async function onRequest(context) {
   try {
     const config = await carregarConfig(request, env);
 
-    // 1. Tentar Mapbox
+    // 1. Nominatim (OpenStreetMap) — gratuito, sem chave de API
+    const resultadosNominatim = await geocodificarNominatim(query, config);
+    if (resultadosNominatim.length > 0) {
+      return jsonResponse(resultadosNominatim);
+    }
+
+    // 2. Fallback: Mapbox
     const resultadosMapbox = await geocodificarMapbox(query, config);
     if (resultadosMapbox.length > 0) {
       return jsonResponse(resultadosMapbox);
     }
 
-    // 2. Fallback: Google Maps (chave via variável de ambiente)
+    // 3. Fallback final: Google Maps (chave via variável de ambiente)
     if (env.GOOGLE_MAPS_KEY) {
       const resultadosGoogle = await geocodificarGoogle(query, config, env.GOOGLE_MAPS_KEY);
       return jsonResponse(resultadosGoogle);
@@ -74,6 +80,67 @@ async function carregarConfig(request, env) {
   const resp = await env.ASSETS.fetch(new Request(assetUrl));
   _cacheConfig = await resp.json();
   return _cacheConfig;
+}
+
+// ─────────────────────────────────────────────
+// Geocodificação via Nominatim (OpenStreetMap) — primário, gratuito
+// ─────────────────────────────────────────────
+async function geocodificarNominatim(query, config) {
+  try {
+    const cidade = config.cidade;
+    // boundingBox no config: "west,north,east,south"
+    // Nominatim viewbox espera: "west,south,east,north"
+    const [west, north, east, south] = cidade.boundingBox.split(',').map(Number);
+
+    const params = new URLSearchParams({
+      q: `${query}, ${cidade.nome}, ${cidade.estado}, Brasil`,
+      format: 'json',
+      limit: '5',
+      countrycodes: 'br',
+      bounded: '1',
+      viewbox: `${west},${south},${east},${north}`,
+      addressdetails: '1',
+      'accept-language': 'pt',
+    });
+
+    const resp = await fetch(
+      `https://nominatim.openstreetmap.org/search?${params}`,
+      {
+        headers: {
+          'User-Agent': `coleta-lixo-${cidade.nome.toLowerCase().replace(/\s+/g, '-')}/1.0`,
+          'Accept-Language': 'pt',
+        },
+      }
+    );
+
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    if (!data?.length) return [];
+
+    return data
+      .filter(r => {
+        const lat = parseFloat(r.lat);
+        const lng = parseFloat(r.lon);
+        return lat >= south && lat <= north && lng >= west && lng <= east;
+      })
+      .map(r => {
+        const addr = r.address || {};
+        return {
+          lat: parseFloat(r.lat),
+          lon: parseFloat(r.lon),
+          display_name: r.display_name,
+          address: {
+            road: addr.road || addr.pedestrian || '',
+            house_number: addr.house_number || '',
+            suburb: addr.suburb || addr.neighbourhood || addr.city_district || '',
+            city: addr.city || addr.town || addr.municipality || '',
+          },
+          fonte: 'nominatim',
+        };
+      });
+  } catch {
+    return [];
+  }
 }
 
 // ─────────────────────────────────────────────
